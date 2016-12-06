@@ -352,7 +352,7 @@ class GenericParser(Parser):
 class Section(MutableMapping):
     default_parser_class = GenericParser
 
-    parsers = [#  сюда вьебать dict и написать DictParser
+    parsers = [#  сюда добавить dict и написать DictParser
         (str, StringParser),
         (bool, BooleanParser),
         (int, IntegerParser),
