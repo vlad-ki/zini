@@ -58,7 +58,7 @@ class Zini(MutableMapping):
             raise TypeError("only strings is allowed for sectors name")
         elif isinstance(value, Section):
             self._sections[key] = value
-        elif not isinstance(value, dict):
+        elif not isinstance(value, dict): # это отхуячить и внести dict  в Section.parsers
             raise TypeError("only dict or Section is allowed for sectors")
         else:
             self[key] = Section(value)
@@ -233,7 +233,7 @@ class TimedeltaParser(OneLineParser):
         res = RE_TIMEDELTA.match(value)
         if not (res and [i for i in res.groups() if i]):
             raise ValueError()
-
+f
 
 class ListParser(Parser):
     def __init__(self, item_parser=None, default=NOT_SET):
@@ -352,14 +352,14 @@ class GenericParser(Parser):
 class Section(MutableMapping):
     default_parser_class = GenericParser
 
-    parsers = [
+    parsers = [#  сюда вьебать dict и написать DictParser
         (str, StringParser),
         (bool, BooleanParser),
         (int, IntegerParser),
         (float, FloatParser),
         (datetime, DatetimeParser),
         (timedelta, TimedeltaParser),
-        (list, ListParser),
+        (list, ListParser),  
     ]
 
     def __init__(self, data=None):
