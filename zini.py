@@ -59,7 +59,7 @@ class Zini(MutableMapping):
         elif isinstance(value, Section):
             self._sections[key] = value
         elif not isinstance(value, dict):
-            raise TypeError("only dict or Sector is allowed for sectors")
+            raise TypeError("only dict or Section is allowed for sectors")
         else:
             self[key] = Section(value)
 
