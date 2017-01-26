@@ -78,7 +78,7 @@ Supported types
     * ``key = 20m`` — 20 minutes
     * ``key = 10h2m`` — 10 hours and 2 minutes
     * ``key = 1w2s`` — one week (7 days) and 2 seconds
-    * ``key = 1s20ms`` — one 2 second and 20 milliseconds
+    * ``key = 1s20ms`` — 1 second and 20 milliseconds
     * ``key = 1w1d1h1m1s1ms`` — 694861001 milliseconds
 
 :list: list of values:
@@ -108,11 +108,28 @@ Examples
     boolean = true
     string = "some string"
 
+    [third]
+    strings =
+        "string 1"
+        "string 2"
+
+    integers =
+        13
+        666
+
+    generic =
+        10
+        "string"
+        3.14
+        false
+        none
+
     [complex]
     list =
         "string"
         "string too"
         "else string"
+
 
 Simple reading
 --------------

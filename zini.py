@@ -49,7 +49,7 @@ class Zini(MutableMapping):
     def __getitem__(self, key):
         section = self._sections.get(key)
         if section is None:
-            self[key] = section = Section()
+            self[key] = section = Section()  # ??
 
         return section
 
@@ -58,7 +58,7 @@ class Zini(MutableMapping):
             raise TypeError("only strings is allowed for sectors name")
         elif isinstance(value, Section):
             self._sections[key] = value
-        elif not isinstance(value, dict): # это отхуячить и внести dict  в Section.parsers
+        elif not isinstance(value, dict):  # это отхуячить и внести dict  в Section.parsers
             raise TypeError("only dict or Section is allowed for sectors")
         else:
             self[key] = Section(value)
@@ -233,7 +233,7 @@ class TimedeltaParser(OneLineParser):
         res = RE_TIMEDELTA.match(value)
         if not (res and [i for i in res.groups() if i]):
             raise ValueError()
-f
+
 
 class ListParser(Parser):
     def __init__(self, item_parser=None, default=NOT_SET):
@@ -316,7 +316,25 @@ class GenericListItemParser(OneLineParser):
             raise ValueError()
 
 
-class GenericParser(Parser):
+class DictParser(Parser):
+
+    def __call__(self, token):
+        self.check(token)
+
+        del token[0]
+        return Section()(token)
+
+    def check(self, token):
+        super().check(token)
+        key, value = get_keyvalue(token)
+        if value:
+            raise ParseError(*token[0])
+
+        for line in tokenize(token[1:]):
+            GenericDictItemParser().check(line)
+
+
+class GenericDictItemParser(Parser):
     parsers = [
         NoneParser,
         StringParser,
@@ -349,21 +367,58 @@ class GenericParser(Parser):
             raise ParseError(*token[0])
 
 
+
+
+class GenericParser(Parser):
+    parsers = [
+        NoneParser,
+        StringParser,
+        BooleanParser,
+        IntegerParser,
+        FloatParser,
+        DatetimeParser,
+        TimedeltaParser,
+        ListParser,
+        DictParser,
+    ]
+
+    def __call__(self, token):
+        self.check(token)
+        for parser in self.parsers:
+            try:
+                return parser()(token)
+            except ParseError:
+                pass
+        else:
+            raise ParseError(*token[0])
+
+    def check(self, token):
+        for parser in self.parsers:
+            try:
+                parser().check(token)
+                return
+            except ParseError:
+                pass
+        else:
+            raise ParseError(*token[0])
+
+
 class Section(MutableMapping):
     default_parser_class = GenericParser
 
-    parsers = [#  сюда добавить dict и написать DictParser
+    parsers = [  # сюда добавить dict и написать DictParser
         (str, StringParser),
         (bool, BooleanParser),
         (int, IntegerParser),
         (float, FloatParser),
         (datetime, DatetimeParser),
         (timedelta, TimedeltaParser),
-        (list, ListParser),  
+        (list, ListParser),
+        (dict, DictParser)  
     ]
 
     def __init__(self, data=None):
-        self._data = {}
+        self._data = {}  # ???
         if data:
             for k, v in data.items():
                 self[k] = v
@@ -453,7 +508,7 @@ def tokenize_sections(lines):
 
     section_token = []
     for n, line in lines:
-        if line and line[0] in '#;':
+        if line and line[0] in ['#', ';']:
             continue
         if line.startswith('[') and line.endswith(']'):
             if section_token:
@@ -516,7 +571,6 @@ def get_key(token):
 def get_keyvalue(token):
     if not token:  # pragma: no cover
         raise ValueError(token)
-
     n, line = token[0]
 
     if '=' not in line:

@@ -135,3 +135,14 @@ def test_parse_list__set_item_parser__bad_type():
     ]
     with pytest.raises(zini.ParseError):
         zini.ListParser(zini.StringParser())(token)
+
+
+def test_parse_dict():
+    token = [
+        (0, 'key ='),
+        (1, '    subkey ='),
+        (2, '        int = 5')
+        (3, '        str = "string"'),
+    ]
+    res = zini.DictParser()(token)
+    assert res == {'subkey': {'int': 5}, {'str': 'string'}}
